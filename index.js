@@ -1,3 +1,38 @@
+{
+    type: 'ADD-TODO',
+    todo: {
+        id: 0,
+        name: 'Learn Redux',
+        complete: false
+    }
+}
+
+{
+    type: 'REMOVE_TODO',
+    id: 0
+}
+
+{
+    type: 'TOGGLE_TODO',
+    id: 0
+}
+
+{
+    type: 'ADD_GOAL',
+    goal: {
+        id: 0,
+        name: 'Run a marathon'
+    }
+}
+
+{
+    type: 'REMOVE_GOAL',
+    id: 0
+}
+
+
+
+
 function createStore () {
     // The store should have four parts
     // 1. The state
@@ -22,3 +57,4 @@ function createStore () {
         subscribe,
     }
 }
+
