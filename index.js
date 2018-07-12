@@ -1,4 +1,7 @@
-{
+
+//All types of actions
+
+/*{
     type: 'ADD_TODO',
         todo: {
             id: 0,
@@ -28,7 +31,8 @@
 {
     type: 'REMOVE_GOAL',
     id: 0
-}
+}*/
+
 
 /*
 Characteristics of a Pure Function
@@ -37,6 +41,8 @@ Characteristics of a Pure Function
 3) Never produce any side effects.
 */
 
+
+//Reducer function
 function todos (state = [], action) {
     if (action.type === 'ADD_TODO') {
         return state.concat([action.todo])          // concat() method returns new array which is getting from previous (first initiator) + next
@@ -47,7 +53,7 @@ function todos (state = [], action) {
 
 
 
-function createStore () {
+function createStore (reducer) {
     // The store should have four parts
     // 1. The state
     // 2. Get the state.
@@ -66,9 +72,17 @@ function createStore () {
         }
     };
 
+    const dispatch = (action) => {
+        state = reducer(state, action)
+        listeners.forEach((listener) => listener())
+    };
+
     return {
         getState,
         subscribe,
+        dispatch
     }
 }
 
+
+const store = createStore(todos)
