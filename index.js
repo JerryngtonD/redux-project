@@ -42,13 +42,21 @@ Characteristics of a Pure Function
 */
 
 
-//Reducer function
+// Reducer function
 function todos (state = [], action) {
-    if (action.type === 'ADD_TODO') {
-        return state.concat([action.todo])          // concat() method returns new array which is getting from previous (first initiator) + next
+    switch(action.type) {
+        case 'ADD_TODO' :
+            // concat() method returns new array which is getting from previous (first initiator) + next
+            return state.concat([action.todo]);
+        case 'REMOVE_TODO' :
+            return state.filter((todo) => todo.id !== action.id);
+        case 'TOGGLE_TODO' :
+            return state.map((todo) => todo.id !== action.id ? todo :
+                Object.assign({}, todo, {complete: !todo.complete})
+            );
+        default :
+            return state
     }
-
-    return state
 }
 
 
@@ -73,7 +81,7 @@ function createStore (reducer) {
     };
 
     const dispatch = (action) => {
-        state = reducer(state, action)
+        state = reducer(state, action);
         listeners.forEach((listener) => listener())
     };
 
@@ -85,4 +93,4 @@ function createStore (reducer) {
 }
 
 
-const store = createStore(todos)
+const store = createStore(todos);
