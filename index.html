@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Todos/Goals</title>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0/redux.min.js'></script>
     </head>
     <body>
         <div>
@@ -16,41 +17,10 @@
             <ul id='goals'></ul>
         </div>
         <script type='text/javascript'>
+
             function generateId() {
                 const randomValue = new Uint32Array(1);
                 return window.crypto.getRandomValues(randomValue).toString(36) + (new Date()).getTime().toString(36);
-            }
-
-            //library code
-            function createStore (reducer) {
-                // The store should have four parts
-                // 1. The state
-                // 2. Get the state.
-                // 3. Listen to changes on the state.
-                // 4. Update the state
-
-                let state;
-                let listeners = [];
-
-                const getState = () => state;
-
-                const subscribe = (listener) => {
-                    listeners.push(listener);
-                    return () => {
-                        listeners = listeners.filter((l) => l !== listener)
-                    }
-                };
-
-                const dispatch = (action) => {
-                    state = reducer(state, action);
-                    listeners.forEach((listener) => listener())
-                };
-
-                return {
-                    getState,
-                    subscribe,
-                    dispatch
-                }
             }
 
             //App code
@@ -95,7 +65,23 @@
                 }
             }
 
+            const checker = (store) => (next) => (action) => {
+                if (
+                    action.type === ADD_TODO &&
+                    action.todo.name.toLowerCase().indexOf('bitcoin') !== -1
+                ) {
+                    return alert("Nope. That's a bad idea.")
+                }
+                if (
+                    action.type === ADD_GOAL &&
+                    action.goal.name.toLowerCase().indexOf('bitcoin') !== -1
+                ) {
+                    return alert("Nope. That's a bad idea.")
+                }
+                return next(action)
+            };
 
+            //reducer functions
             function todos (state = [], action) {
                 switch(action.type) {
                     case ADD_TODO :
@@ -123,20 +109,58 @@
                 }
             }
 
-            function app (state = {}, action) {
-                return {
-                    todos: todos(state.todos, action),
-                    goals: goals(state.goals, action)
-                }
-            }
 
-
-            const store = createStore(app);
+            const store = Redux.createStore(Redux.combineReducers({
+                todos,
+                goals
+            }), Redux.applyMiddleware(checker));
 
 
             const unsubscribe = store.subscribe(() => {
-                console.log('The new state is: ', store.getState())
+                const { goals, todos } = store.getState();
+
+                document.querySelector('#todos').innerHTML = '';
+                document.querySelector('#goals').innerHTML = '';
+
+                goals.forEach(addGoalToDOM);
+                todos.forEach(addTodoToDOM);
+
+                console.log(store.getState())
             });
+
+            function addTodoToDOM(todo) {
+                const node = document.createElement('li');
+                const text = document.createTextNode(todo.name);
+
+                const removeBtn = createRemoveButton(() => {
+                    store.dispatch(removeTodoAction(todo.id))
+                });
+
+                node.appendChild(text);
+                node.appendChild(removeBtn);
+
+                node.style.textDecoration = todo.complete ? 'line-through' : 'none';
+                node.addEventListener('click', () => {
+                    store.dispatch(toggleTodoAction(todo.id));
+                });
+
+                document.querySelector('#todos').appendChild(node);
+
+            }
+
+            function addGoalToDOM(goal) {
+                const node = document.createElement('li');
+                const text = document.createTextNode(goal.name);
+
+                const removeBtn = createRemoveButton(() => {
+                    store.dispatch(removeGoalAction(goal.id))
+                });
+
+                node.appendChild(text);
+                node.appendChild(removeBtn);
+
+                document.querySelector('#goals').appendChild(node);
+            }
 
 /*            store.dispatch(addTodoAction({
                 id: 0,
@@ -174,6 +198,14 @@
 
 
             // DOM code
+
+            function createRemoveButton (onClick) {
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = 'X';
+                removeBtn.addEventListener('click', onClick);
+
+                return removeBtn;
+            }
 
             function addTodo () {
                 const input = document.querySelector('#todo');
