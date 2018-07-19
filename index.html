@@ -74,13 +74,19 @@
                     action.type === ADD_TODO &&
                     action.todo.name.toLowerCase().indexOf('bitcoin') !== -1
                 ) {
-                    return alert("Nope. That's a bad idea.")
+                    return alert("Nope. That's a bad idea.");
                 }
                 if (
                     action.type === ADD_GOAL &&
                     action.goal.name.toLowerCase().indexOf('bitcoin') !== -1
                 ) {
-                    return alert("Nope. That's a bad idea.")
+                    return alert("Nope. That's a bad idea.");
+                }
+                if (action.type === ADD_GOAL && action.goal.name.length === 0) {
+                    return alert("Nope. Trying to add empty goal.");
+                }
+                if (action.type === ADD_TODO && action.todo.name.length === 0) {
+                    return alert("Nope. Trying to add empty todo.");
                 }
                 return next(action)
             };
@@ -174,7 +180,12 @@
                 };
 
                 removeItem = (todo) => {
-                    this.props.store.dispatch(removeTodoAction(todo.id))
+                    this.props.store.dispatch(removeTodoAction(todo.id));
+                    return API.deleteTodo(todo.id)
+                        .catch(() => {
+                            this.props.store.dispatch(addTodoAction(todo));
+                            alert('An error was occured. Try again');
+                        });
                 };
 
                 toggleItem = (id) => {
@@ -213,7 +224,12 @@
                 };
 
                 removeItem = (goal) => {
-                    this.props.store.dispatch(removeGoalAction(goal.id))
+                    this.props.store.dispatch(removeGoalAction(goal.id));
+                    API.deleteGoal(goal.id)
+                        .catch(() => {
+                            this.props.store.dispatch(addGoalAction(goal));
+                            alert('An error was occured. Try again');
+                        });
                 };
 
 
